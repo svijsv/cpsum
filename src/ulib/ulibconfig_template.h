@@ -87,9 +87,8 @@
 /*
 * Bitwise operation module configuration
 */
-// The width of the unsigned integer used in the type-checked bit operation
-// functions.
-#define BITOP_WIDTH 32
+// Enable this module
+#define ULIB_ENABLE_BITOPS ULIB_ENABLE_DEFAULT
 
 
 /*

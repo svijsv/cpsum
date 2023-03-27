@@ -227,7 +227,7 @@ void msg_debug(const char *restrict fmt, ...)
  * If MSG_PRINTNAME is set and PROGRAM_NAME is defined, messages are prefixed
  * with 'PROGRAM_NAME: '.
  *
- * Nothing is printed unless priority >= msg_verbosity.
+ * Nothing is printed unless priority <= msg_verbosity.
  */
 void msg_print(int8_t priority, const char *restrict fmt, ...)
 	__attribute__ ((format(printf, 2, 3)));

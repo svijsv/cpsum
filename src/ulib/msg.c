@@ -146,6 +146,11 @@ int msg_gets(char *restrict s, int size) {
 			break;
 		} else if (b == '\r') {
 			// Nothing to  do here.
+		} else if (b == '\b') {
+			if (have > 0) {
+				--have;
+				s[have] = 0;
+			}
 		} else {
 			s[have] = b;
 			++have;

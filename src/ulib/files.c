@@ -140,6 +140,8 @@ static int v_unlinkat(int atfd, const char *path, int flags) {
 }
 static ssize_t v_write(int fd, const void *buf, size_t count) {
 	ssize_t bytes, total_bytes = 0;
+	// We need a non-void type to adjust the buf pointer below.
+	const uint8_t *cbuf = buf;
 
 #if DO_FILE_EXTRA_SAFETY_CHECKS
 	assert(FD_IS_VALID(fd));
@@ -156,13 +158,14 @@ static ssize_t v_write(int fd, const void *buf, size_t count) {
 #endif
 
 	while (count > 0) {
-		bytes = write(fd, buf, count);
+		bytes = write(fd, cbuf, count);
 		if (bytes < 0) {
 			if (errno != EINTR) {
 				return -1;
 			}
 		} else {
 			count -= (size_t )bytes;
+			cbuf += bytes;
 			total_bytes += bytes;
 		}
 	}
