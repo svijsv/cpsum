@@ -46,6 +46,16 @@
 # define ABS(_n) ((_n < 0) ? -_n : _n)
 #endif
 
+#define TERABYTE (GIGABYTE * 1024)
+#define GIGABYTE (MEGABYTE * 1024)
+#define MEGABYTE (KILOBYTE * 1024)
+#define KILOBYTE (BYTE * 1024)
+#define BYTE (1)
+
+#define HOUR (MINUTE * 60)
+#define MINUTE (SECOND * 60)
+#define SECOND (1)
+
 typedef uint_fast32_t flag_t;
 //
 // Flags for program options
@@ -952,6 +962,63 @@ static void show_help(const opt_option_t *options) {
 
 	return;
 }
+void print_bytes_copied(int8_t priority, size_t byte_count, uint_t file_count, uint_t secs, uint_t usecs, char *prefix) {
+	size_t base = 0;
+	char *suf = "B";
+	char byte_str[64];
+	uint_t h, m, s;
+
+	if (prefix == NULL) {
+		prefix = "";
+	}
+
+// Check the sizes * 10 so that ((byte_count % base) * 100) doesn't overflow below.
+/*
+#if SIZE_MAX > TERABYTE * 10
+	if (byte_count >= TERABYTE) {
+		base = TERABYTE;
+		suf = "TB";
+	} else
+#endif
+*/
+#if SIZE_MAX > GIGABYTE * 10
+	if (byte_count >= GIGABYTE) {
+		base = GIGABYTE;
+		suf = "GB";
+	} else
+#endif
+#if SIZE_MAX > MEGABYTE * 10
+	if (byte_count >= MEGABYTE) {
+		base = MEGABYTE;
+		suf = "MB";
+	} else
+#endif
+	if (byte_count >= KILOBYTE) {
+		base = KILOBYTE;
+		suf = "KB";
+	}
+	if (base > 0) {
+		uint_t maj, min;
+
+		maj = (uint_t )(byte_count / base);
+		min = (uint_t )(((byte_count % base) * 100) / base);
+		snprintf(byte_str, 64, "%u.%u%s (%luB)", maj, min, suf, (long unsigned )byte_count);
+	} else {
+		snprintf(byte_str, 64, "%luB", (long unsigned )byte_count);
+	}
+
+	h = secs / HOUR;
+	m = (secs % HOUR) / MINUTE;
+	s = (secs % MINUTE);
+
+	if (file_count > 1) {
+		msg_print(priority, "%s%s copied from %u files in %uh%um%us (%u.%06u seconds).", prefix, byte_str, file_count, h, m, s, secs, usecs);
+	} else {
+		msg_print(priority, "%s%s copied in %uh%um%us (%u.%06u seconds).", prefix, byte_str, h, m, s, secs, usecs);
+	}
+
+	return;
+}
 static void write_fmt(output_file_t *of, hash_ctx_t *ctx) {
 	static string_t *basename = NULL;
 
@@ -1250,7 +1317,7 @@ static void copy_file(copy_path_t *copy_path, struct stat *src_st, struct stat *
 		uint_t s, us;
 
 		timeval_diff(&tv_start, NULL, &s, &us);
-		msg_print(MSG_VERB_EXTRA, "   %lu bytes copied in %u.%06u seconds.", (long unsigned )(g_total_bytes - previous_bytes), s, us);
+		print_bytes_copied(MSG_VERB_EXTRA, (g_total_bytes - previous_bytes), 1, s, us, "   ");
 	}
 
 END:
@@ -1936,7 +2003,7 @@ END:
 		uint_t s, us;
 
 		timeval_diff(&tv_start, NULL, &s, &us);
-		msg_print(MSG_VERB_NORM, "%lu bytes copied from %u files in %u.%06u seconds.", (long unsigned )g_total_bytes, (uint_t )g_total_files, s, us);
+		print_bytes_copied(MSG_VERB_NORM, g_total_bytes, g_total_files, s, us, "");
 	}
 
 	if ((g_error_count > 0) || (g_warning_count > 0)) {
