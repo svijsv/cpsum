@@ -24,6 +24,7 @@ _DEBUG_CFLAGS  := -Werror -Wall -Wextra -pedantic \
 # doesn't support them.
 #_DEBUG_CFLAGS += -Wformat-overflow -Wformat-truncation -Wformat-signedness -Wstrict-aliasing=3
 _RELEASE_CFLAGS := -UDEBUG -DNDEBUG=1
+_STATIC_CFLAGS := -static -static-libgcc
 _LDFLAGS       :=
 
 _CPSUM_CFLAGS  :=
@@ -51,6 +52,7 @@ SU_FILES := $(patsubst %.o, %.su, $(O_FILES) $(ULIB_O_FILES) $(GNULIB_O_FILES))
 all: clean cpsum-release
 debug: clean cpsum-debug
 release: clean cpsum-release
+static: clean cpsum-static
 
 $(TMP_BASE):
 	mkdir -p $(TMP_BASE)
@@ -71,6 +73,9 @@ cpsum-debug: cpsum
 
 cpsum-release: _CFLAGS += $(_RELEASE_CFLAGS)
 cpsum-release: cpsum
+
+cpsum-static: _CFLAGS += $(_STATIC_CFLAGS)
+cpsum-static: cpsum-release
 
 $(O_FILES):
 	$(CC) $(_CFLAGS) $(_CPSUM_CFLAGS) $(CFLAGS) -o $@ -c $(patsubst $(TMP_BASE)/%.o, src/%.c, $@);
