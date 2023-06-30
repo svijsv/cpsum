@@ -1493,6 +1493,9 @@ int main(int argc, char **argv) {
 	const char *output_fmt = "%md5  %d";
 	struct timeval tv_start;
 	msg_init_t msg_init_struct = {
+		.stdin_fd = -1,
+		.stdout_fd = -1,
+		.stderr_fd = -1,
 		.verbosity = MSG_VERB_NORM,
 		.flags = MSG_LIBERRORS,
 		.program_name = NULL
