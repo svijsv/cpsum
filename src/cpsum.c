@@ -1422,7 +1422,7 @@ static void copy_src(copy_path_t *copy_path, flag_t flags) {
 		char *c = copy_path->dest_path->cstring;
 
 		for (strlen_t i = 0; i < copy_path->dest_path->length; ++i) {
-			if (c[i] == '/') {
+			if ((c[i] == '/') && (i > 0)) {
 				c[i] = 0;
 				if (mkdir(copy_path->dest_path->cstring, NEWDIR_PERMS) < 0) {
 					// If the path exists but isn't a directory, the error will
